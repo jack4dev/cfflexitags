@@ -1,0 +1,4000 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0059)http://localhost/dev/Cf_practice/working/flexiTags/home.cfm -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Flexi Query Demo</title>
+</head>
+<body>
+
+<style>
+
+
+	table.cfdump_wddx,
+	table.cfdump_xml,
+	table.cfdump_struct,
+	table.cfdump_varundefined,
+	table.cfdump_array,
+	table.cfdump_query,
+	table.cfdump_cfc,
+	table.cfdump_object,
+	table.cfdump_binary,
+	table.cfdump_udf,
+	table.cfdump_udfbody,
+	table.cfdump_udfarguments {
+		font-size: xx-small;
+		font-family: verdana, arial, helvetica, sans-serif;
+		cell-spacing: 2px;
+	}
+
+	table.cfdump_wddx th,
+	table.cfdump_xml th,
+	table.cfdump_struct th,
+	table.cfdump_varundefined th,
+	table.cfdump_array th,
+	table.cfdump_query th,
+	table.cfdump_cfc th,
+	table.cfdump_object th,
+	table.cfdump_binary th,
+	table.cfdump_udf th,
+	table.cfdump_udfbody th,
+	table.cfdump_udfarguments th {
+		text-align: left;
+		color: white;
+		padding: 5px;
+	}
+
+	table.cfdump_wddx td,
+	table.cfdump_xml td,
+	table.cfdump_struct td,
+	table.cfdump_varundefined  td,
+	table.cfdump_array td,
+	table.cfdump_query td,
+	table.cfdump_cfc td,
+	table.cfdump_object td,
+	table.cfdump_binary td,
+	table.cfdump_udf td,
+	table.cfdump_udfbody td,
+	table.cfdump_udfarguments td {
+		padding: 3px;
+		background-color: #ffffff;
+		vertical-align : top;
+	}
+
+	table.cfdump_wddx {
+		background-color: #000000;
+	}
+	table.cfdump_wddx th.wddx {
+		background-color: #444444;
+	}
+
+
+	table.cfdump_xml {
+		background-color: #888888;
+	}
+	table.cfdump_xml th.xml {
+		background-color: #aaaaaa;
+	}
+	table.cfdump_xml td.xml {
+		background-color: #dddddd;
+	}
+
+	table.cfdump_struct {
+		background-color: #0000cc ;
+	}
+	table.cfdump_struct th.struct {
+		background-color: #4444cc ;
+	}
+	table.cfdump_struct td.struct {
+		background-color: #ccddff;
+	}
+
+	table.cfdump_varundefined {
+		background-color: #CC3300 ;
+	}
+	table.cfdump_varundefined th.varundefined {
+		background-color: #CC3300 ;
+	}
+	table.cfdump_varundefined td.varundefined {
+		background-color: #ccddff;
+	}
+
+	table.cfdump_array {
+		background-color: #006600 ;
+	}
+	table.cfdump_array th.array {
+		background-color: #009900 ;
+	}
+	table.cfdump_array td.array {
+		background-color: #ccffcc ;
+	}
+
+	table.cfdump_query {
+		background-color: #884488 ;
+	}
+	table.cfdump_query th.query {
+		background-color: #aa66aa ;
+	}
+	table.cfdump_query td.query {
+		background-color: #ffddff ;
+	}
+
+
+	table.cfdump_cfc {
+		background-color: #ff0000;
+	}
+	table.cfdump_cfc th.cfc{
+		background-color: #ff4444;
+	}
+	table.cfdump_cfc td.cfc {
+		background-color: #ffcccc;
+	}
+
+
+	table.cfdump_object {
+		background-color : #ff0000;
+	}
+	table.cfdump_object th.object{
+		background-color: #ff4444;
+	}
+
+	table.cfdump_binary {
+		background-color : #eebb00;
+	}
+	table.cfdump_binary th.binary {
+		background-color: #ffcc44;
+	}
+	table.cfdump_binary td {
+		font-size: x-small;
+	}
+	table.cfdump_udf {
+		background-color: #aa4400;
+	}
+	table.cfdump_udf th.udf {
+		background-color: #cc6600;
+	}
+	table.cfdump_udfarguments {
+		background-color: #dddddd;
+		cell-spacing: 3;
+	}
+	table.cfdump_udfarguments th {
+		background-color: #eeeeee;
+		color: #000000;
+	}
+
+</style> <script language="javascript">
+
+
+// for queries we have more than one td element to collapse/expand
+	var expand = "open";
+
+	dump = function( obj ) {
+		var out = "" ;
+		if ( typeof obj == "object" ) {
+			for ( key in obj ) {
+				if ( typeof obj[key] != "function" ) out += key + ': ' + obj[key] + '<br>' ;
+			}
+		}
+	}
+
+
+	cfdump_toggleRow = function(source) {
+		//target is the right cell
+		if(document.all) target = source.parentElement.cells[1];
+		else {
+			var element = null;
+			var vLen = source.parentNode.childNodes.length;
+			for(var i=vLen-1;i>0;i--){
+				if(source.parentNode.childNodes[i].nodeType == 1){
+					element = source.parentNode.childNodes[i];
+					break;
+				}
+			}
+			if(element == null)
+				target = source.parentNode.lastChild;
+			else
+				target = element;
+		}
+		//target = source.parentNode.lastChild ;
+		cfdump_toggleTarget( target, cfdump_toggleSource( source ) ) ;
+	}
+
+	cfdump_toggleXmlDoc = function(source) {
+
+		var caption = source.innerHTML.split( ' [' ) ;
+
+		// toggle source (header)
+		if ( source.style.fontStyle == 'italic' ) {
+			// closed -> short
+			source.style.fontStyle = 'normal' ;
+			source.innerHTML = caption[0] + ' [short version]' ;
+			source.title = 'click to maximize' ;
+			switchLongToState = 'closed' ;
+			switchShortToState = 'open' ;
+		} else if ( source.innerHTML.indexOf('[short version]') != -1 ) {
+			// short -> full
+			source.innerHTML = caption[0] + ' [long version]' ;
+			source.title = 'click to collapse' ;
+			switchLongToState = 'open' ;
+			switchShortToState = 'closed' ;
+		} else {
+			// full -> closed
+			source.style.fontStyle = 'italic' ;
+			source.title = 'click to expand' ;
+			source.innerHTML = caption[0] ;
+			switchLongToState = 'closed' ;
+			switchShortToState = 'closed' ;
+		}
+
+		// Toggle the target (everething below the header row).
+		// First two rows are XMLComment and XMLRoot - they are part
+		// of the long dump, the rest are direct children - part of the
+		// short dump
+		if(document.all) {
+			var table = source.parentElement.parentElement ;
+			for ( var i = 1; i < table.rows.length; i++ ) {
+				target = table.rows[i] ;
+				if ( i < 3 ) cfdump_toggleTarget( target, switchLongToState ) ;
+				else cfdump_toggleTarget( target, switchShortToState ) ;
+			}
+		}
+		else {
+			var table = source.parentNode.parentNode ;
+			var row = 1;
+			for ( var i = 1; i < table.childNodes.length; i++ ) {
+				target = table.childNodes[i] ;
+				if( target.style ) {
+					if ( row < 3 ) {
+						cfdump_toggleTarget( target, switchLongToState ) ;
+					} else {
+						cfdump_toggleTarget( target, switchShortToState ) ;
+					}
+					row++;
+				}
+			}
+		}
+	}
+
+	cfdump_toggleTable = function(source) {
+
+		var switchToState = cfdump_toggleSource( source ) ;
+		if(document.all) {
+			var table = source.parentElement.parentElement ;
+			for ( var i = 1; i < table.rows.length; i++ ) {
+				target = table.rows[i] ;
+				cfdump_toggleTarget( target, switchToState ) ;
+			}
+		}
+		else {
+			var table = source.parentNode.parentNode ;
+			for ( var i = 1; i < table.childNodes.length; i++ ) {
+				target = table.childNodes[i] ;
+				if(target.style) {
+					cfdump_toggleTarget( target, switchToState ) ;
+				}
+			}
+		}
+	}
+
+	cfdump_toggleSource = function( source ) {
+		if ( source.style.fontStyle == 'italic' || source.style.fontStyle == null) {
+			source.style.fontStyle = 'normal' ;
+			source.title = 'click to collapse' ;
+			return 'open' ;
+		} else {
+			source.style.fontStyle = 'italic' ;
+			source.title = 'click to expand' ;
+			return 'closed' ;
+		}
+	}
+
+	cfdump_toggleTarget = function( target, switchToState ) {
+		if ( switchToState == 'open' )	target.style.display = '' ;
+		else target.style.display = 'none' ;
+	}
+
+	// collapse all td elements for queries
+	cfdump_toggleRow_qry = function(source) {
+		expand = (source.title == "click to collapse") ? "closed" : "open";
+		if(document.all) {
+			var nbrChildren = source.parentElement.cells.length;
+			if(nbrChildren > 1){
+				for(i=nbrChildren-1;i>0;i--){
+					target = source.parentElement.cells[i];
+					cfdump_toggleTarget( target,expand ) ;
+					cfdump_toggleSource_qry(source);
+				}
+			}
+			else {
+				//target is the right cell
+				target = source.parentElement.cells[1];
+				cfdump_toggleTarget( target, cfdump_toggleSource( source ) ) ;
+			}
+		}
+		else{
+			var target = null;
+			var vLen = source.parentNode.childNodes.length;
+			for(var i=vLen-1;i>1;i--){
+				if(source.parentNode.childNodes[i].nodeType == 1){
+					target = source.parentNode.childNodes[i];
+					cfdump_toggleTarget( target,expand );
+					cfdump_toggleSource_qry(source);
+				}
+			}
+			if(target == null){
+				//target is the last cell
+				target = source.parentNode.lastChild;
+				cfdump_toggleTarget( target, cfdump_toggleSource( source ) ) ;
+			}
+		}
+	}
+
+	cfdump_toggleSource_qry = function(source) {
+		if(expand == "closed"){
+			source.title = "click to expand";
+			source.style.fontStyle = "italic";
+		}
+		else{
+			source.title = "click to collapse";
+			source.style.fontStyle = "normal";
+		}
+	}
+
+</script> 
+                    <table class="cfdump_cfc">
+                    <tbody><tr>
+                        <th class="cfc" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse"><a name="cfc1"><span id="_cfc1" style="display:none">[cfc1]</span> component</a>
+                        <a style="color: white;" href="http://localhost/CFIDE/componentutils/cfcexplorer.cfc?method=getcfcinhtml&name=com.adobe.coldfusion.query">com.adobe.coldfusion.query</a>
+                        
+                            <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;extends
+                            <a style="color: white;" href="http://localhost/CFIDE/componentutils/cfcexplorer.cfc?method=getcfcinhtml&name=com.adobe.coldfusion.base">com.adobe.coldfusion.base</a>
+                        
+                        </th>
+                    </tr>
+                    
+                        <tr>
+                        <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">PROPERTIES</td>
+                        <td valign="top">
+                        
+                            <table class="cfdump_cfc">
+                            
+                                <tbody><tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">name</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">blockfactor</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">cachedafter</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">cachedwithin</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">dataSource</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">dbtype</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">debug</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">maxRows</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">password</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">result</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">timeout</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">username</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">sql</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">fetchclientinfo</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                                <tr valign="top">
+                                <td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor:pointer;font-style : normal;" title="click to collapse">clientinfo</td>
+                                <td>
+                                [empty string] 
+                                </td>
+                                </tr>
+                                
+                            </tbody></table>
+                        
+                        </td>
+                        </tr>
+                    
+							<tr>
+							
+							<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: normal; background-color: rgb(255, 153, 170);" title="click to collapse">METHODS</td>
+							<td valign="top">
+							
+							<table class="cfdump_cfc">
+							
+								<tbody><tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">ADDPARAM</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function addParam</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>void<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Add child tags like cfmailparam, cfmailpart etc</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">APPENDALLOWEXTRAATTRIBUTES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function appendAllowExtraAttributes</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>params</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>array<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Validate against any incorrect attributes passed to the child tags. This is done by passing allowExtraAttributes=false</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">ARRAYINSERT</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function arrayinsert</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>sqlArray1</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sqlArray2</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>pos</td>
+						<td>Optional</td>
+						<td>numeric</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>array<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Merge one array into another at a specified position and returns the merged array</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">CHECKIFNAMEDPARAMEXISTS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function checkIfNamedParamExists</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>namedSqlparams</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>namedparam</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>boolean<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Checks if a named sql param exists in namedparams array.</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">CLEAR</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function clear</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>void<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Removes service tag attributes</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">CLEARATTRIBUTE</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function clearAttribute</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>tagAttributesStruct</td>
+						<td>Optional</td>
+						<td>struct</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>tagAttribute</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>void<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Removes a specific service tag attribute from CFC variables scope. Invoked by clearAttributes()</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">CLEARATTRIBUTES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function clearAttributes</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>tagAttributesToClear</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>[empty string] </td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>void<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Removes all|some of the service tag attributes from CFC variables scope. Accepts a list of service tag attributes to remove. If no attributes are specified, all attributes are removed from CFC variables scope</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">CLEARPARAMS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function clearParams</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>void<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Resets child tags by resetting the parameters array</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">CLEARPROPERTIES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function clearProperties</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>attribs</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>[empty string] </td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>void<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Clear cfc properties. Wrapper for clearAttributes()</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">EXECUTE</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function execute</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>result<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Invoke the cfquery (and cfqueryparam) service tag to execute a query in cfscript. Returns the query resultset</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETATTRIBUTES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function getAttributes</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>attribs</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>[empty string] </td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>struct<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Returns a struct with all/some of the service tag attribute values. If no attributes are specified, it returns a coldfusion with all service tag attribute values</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETBLOCKFACTOR</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETBLOCKFACTOR</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>numeric<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETCACHEDAFTER</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETCACHEDAFTER</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETCACHEDWITHIN</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETCACHEDWITHIN</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETCLIENTINFO</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETCLIENTINFO</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>struct<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETDATASOURCE</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETDATASOURCE</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETDBTYPE</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETDBTYPE</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETDEBUG</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETDEBUG</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>boolean<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETFETCHCLIENTINFO</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETFETCHCLIENTINFO</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETMAXROWS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETMAXROWS</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>numeric<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETNAME</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETNAME</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETNAMEDSQLPARAMS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function getNamedSqlParams</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>queryparams</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>array<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>parse queryparams stored in parameters array to filter out all named sql params.</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETPASSWORD</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETPASSWORD</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETPOSITIONALSQLPARAMS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function getPositionalSqlParams</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>queryparams</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>array<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>parse queryparams stored in parameters array to filter out all postional sql params.</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETPRESERVESINGLEQUOTES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function getPreserveSingleQuotes</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>sqlstatement</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>preservesinglequotes() can't handle expressions, so something like #preservesinglequotes(SQlArray[1])# would'nt work, hence the need for this wrapper</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETPROPERTIES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function getProperties</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>attribs</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>[empty string] </td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>struct<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Get cfc properties. Wrapper for getAttributes()</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETRESULT</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETRESULT</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETSQL</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETSQL</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETSUPPORTEDTAGATTRIBUTES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function getSupportedTagAttributes</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>tagName</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Accepts a service tag name and returns the allowed tag attributes. Uses double-checked locking</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETTAGATTRIBUTES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function getTagAttributes</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>struct<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Returns a struct with attributes set either using implicit setters | init() | setAttributes()</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETTAGNAME</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function getTagName</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Get the name of the service tag</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETTIMEOUT</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETTIMEOUT</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>numeric<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">GETUSERNAME</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function GETUSERNAME</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">INIT</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function init</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Initialization routine. Returns an instance of this component</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">INSERTNAMEDPARAMS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function insertNamedParams</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>namedparam</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>namedparamsarray</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sqlParams</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sql</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>array<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Inserts a named sql param into sqlParams array. If the named param is not found, an exception is thrown</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">INVOKETAG</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function invokeTag</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>tagName</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>tagAttributes</td>
+						<td>Optional</td>
+						<td>struct</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>tagParams</td>
+						<td>Optional</td>
+						<td>struct</td>
+						<td>[runtime expression] </td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>any<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>invokes the service tag</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">PARSESQL</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function parseSQL</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>sql</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>queryparams</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sqlCommand</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>any<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Parse the SQL into named and positional params.  For named params, order of params is not important but for postional params we need to match the order in which the params are listed.  Named SQL parameters are specified using ":" (for example, select  * from art where artid = :artistid) Positional SQL parameters are specified using  "?" (for example, select  * from art where artid = ? and artistid = ?)  A combination of named and positional sql params is also possible (although not encouraged) (for example, select  * from art where artid = :artid and artistid = ?)  If named/positional param delimiters (i.e. ":" and "?") appear inside single quotes, we replace them with markers to help with the parsing. After we are done with the parsing and before we pass the sql to execute() for execution, we replace the markers back with the delimiters  This function parses the sql into sqlArray[] and sqlParams[]</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">PROCESSNAMEDPARAMS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function processNamedParams</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>sqlArray</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sqlParams</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>namedparamsarray</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>queryparams</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sqlCommand</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sql</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>struct<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Processes named sql params. Invokes insertNamedParams() to insert the named param into sqlparams array.</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">PROCESSPOSPARAMS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function processPosParams</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>sqlArray</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sqlParams</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>posparamsarray</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>queryparams</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sql</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>struct<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Processes positional sql params</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">REMOVEPOSPARAM</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function removePosParam</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>posparamsarray</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>array<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Removes first positional param from positional sql params array</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">REPLACEDELIMSWITHMARKERS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function replaceDelimsWithMarkers</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>sql</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sqlDelimtersList</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sqlDelimtersMarkersList</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>replace named and positional delimiters inside single quotes with corresponding markers to allow parsing SQL on delimiters</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">REPLACEMARKERSWITHDELIMS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function replaceMarkersWithDelims</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>sqlArray</td>
+						<td>Optional</td>
+						<td>array</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sqlDelimtersMarkersList</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+					<tr>
+						<td>sqlDelimtersList</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>array<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Replaces markers for named and positional delimiters (inside single quotes) with actual delimiters</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETATTRIBUTES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function setAttributes</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>void<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Set service tag attributes.</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETBLOCKFACTOR</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETBLOCKFACTOR</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>blockfactor</td>
+						<td>Required</td>
+						<td>numeric</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETCACHEDAFTER</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETCACHEDAFTER</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>cachedafter</td>
+						<td>Required</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETCACHEDWITHIN</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETCACHEDWITHIN</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>cachedwithin</td>
+						<td>Required</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETCLIENTINFO</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETCLIENTINFO</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>clientinfo</td>
+						<td>Required</td>
+						<td>struct</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETDATASOURCE</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETDATASOURCE</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>dataSource</td>
+						<td>Required</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETDBTYPE</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETDBTYPE</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>dbtype</td>
+						<td>Required</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETDEBUG</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETDEBUG</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>debug</td>
+						<td>Required</td>
+						<td>boolean</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETFETCHCLIENTINFO</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETFETCHCLIENTINFO</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>fetchclientinfo</td>
+						<td>Required</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETMAXROWS</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETMAXROWS</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>maxRows</td>
+						<td>Required</td>
+						<td>numeric</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETNAME</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETNAME</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>name</td>
+						<td>Required</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETPASSWORD</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETPASSWORD</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>password</td>
+						<td>Required</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETPROPERTIES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function setProperties</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td><i>Arguments:</i></td><td>none</td>
+				
+			</tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>void<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Set cfc properties. Wrapper for setAttributes()</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETRESULT</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETRESULT</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>result</td>
+						<td>Required</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETSQL</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETSQL</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>sql</td>
+						<td>Required</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETTAGNAME</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function setTagName</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>tagName</td>
+						<td>Optional</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>void<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Set the name of the service tag to be invoked</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETTIMEOUT</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETTIMEOUT</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>timeout</td>
+						<td>Required</td>
+						<td>numeric</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">SETUSERNAME</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function SETUSERNAME</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>username</td>
+						<td>Required</td>
+						<td>string</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>com.adobe.coldfusion.query<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>public<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">TRIMATTRIBUTES</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function trimAttributes</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>attribs</td>
+						<td>Optional</td>
+						<td>struct</td>
+						<td>[runtime expression] </td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>struct<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Trim tag attributes</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+								<tr valign="top">
+								<td class="cfc" onclick="cfdump_toggleRow(this);" style="cursor: pointer; font-style: italic; background-color: rgb(255, 153, 170);" title="click to expand">VALIDATESQL</td>
+								<td style="display: none;">
+								
+		<table class="cfdump_udf" width="100%">
+		<tbody><tr><th class="udf" colspan="2" onclick="cfdump_toggleTable(this);" style="cursor:pointer;" title="click to collapse">function validateSQL</th></tr>
+		<tr>
+			<td>
+			<table class="cfdump_udfbody">
+			<tbody><tr>
+				
+				<td colspan="2">
+				<i>Arguments:</i>
+				<br>
+				<table class="cfdump_udfarguments">
+					<tbody><tr>
+						<th><b>Name</b></th>
+						<th><b>Required</b></th>
+						<th><b>Type</b></th>
+						<th><b>Default</b></th>
+					</tr>
+					
+					<tr>
+						<td>tagAttributes</td>
+						<td>Optional</td>
+						<td>struct</td>
+						<td>&nbsp;</td>
+					</tr>
+					
+				</tbody></table>
+				
+			</td></tr>
+			<tr><td width="30%"><i>ReturnType:</i></td>
+				<td>string<br></td>
+			</tr>
+			<tr><td><i>Roles:</i></td>
+				<td>&nbsp;<br></td>
+			</tr>
+			<tr><td><i>Access:</i></td>
+				<td>private<br></td>
+			</tr>
+			<tr><td><i>Output:</i></td>
+				<td>false</td>
+			</tr>
+			<tr><td><i>DisplayName:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td><i>Hint:</i></td>
+				<td>Validate SQL for errors</td>
+			</tr>
+			<tr><td><i>Description:</i></td>
+				<td>&nbsp;</td>
+			</tr>
+			</tbody></table>
+			</td>
+		</tr>
+		</tbody></table>
+		
+								</td>
+								</tr>
+								
+							</tbody></table>
+							</td>
+							</tr>
+						
+                    </tbody></table>
+                    <iframe frameborder="0" scrolling="no" style="border: 0px; display: none; background-color: transparent;"></iframe><div id="GOOGLE_INPUT_CHEXT_FLAG" style="display: none;" input="null" input_stat="{&quot;tlang&quot;:true,&quot;tsbc&quot;:true,&quot;pun&quot;:true,&quot;mk&quot;:false,&quot;ss&quot;:true}"></div></body></html>
